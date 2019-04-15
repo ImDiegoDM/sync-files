@@ -1,0 +1,27 @@
+{
+  "06. TrabalhoFinal.pdf": {
+    "checksum": 250248441,
+    "SubItens": null
+  },
+  "partituras": {
+    "checksum": "",
+    "SubItens": {
+      "Disney_Pixar_Up_Theme_Piano.pdf": {
+        "checksum": 2121092384,
+        "SubItens": null
+      },
+      "bohemian_rhapsody.pdf": {
+        "checksum": 1022305465,
+        "SubItens": null
+      },
+      "queen-bohemian-rhapsody.pdf": {
+        "checksum": 287989756,
+        "SubItens": null
+      }
+    }
+  },
+  "test.txt": {
+    "checksum": 4177538280,
+    "SubItens": null
+  }
+}

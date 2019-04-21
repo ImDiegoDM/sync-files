@@ -1,39 +1,18 @@
 package main
 
 import (
-	"SyncFiles/utils"
-	"encoding/json"
-	"fmt"
-	"os"
+	"SyncFiles/api"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
-func saveInJson(json string) {
-	f, err := os.Create("hashed.json")
-	check(err)
-
-	defer f.Close()
-
-	_, wError := f.WriteString(json)
-
-	check(wError)
-
-}
-
 func main() {
-	hashed, err := utils.HashFolder("./sync")
-	check(err)
+	r := mux.NewRouter()
 
-	jsonString, err := json.MarshalIndent(hashed, "", "  ")
+	api.SetRoutes(r)
 
-	check(err)
-
-	saveInJson(string(jsonString))
-
-	fmt.Println("Saved")
+	http.Handle("/", r)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

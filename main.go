@@ -8,11 +8,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	port = "8080"
+)
+
 func main() {
 	r := mux.NewRouter()
 
 	api.SetRoutes(r)
 
 	http.Handle("/", r)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Server is runing on port " + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

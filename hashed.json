@@ -3,6 +3,10 @@
     "checksum": 250248441,
     "SubItens": null
   },
+  "otherText.ts": {
+    "checksum": 246742902,
+    "SubItens": null
+  },
   "partituras": {
     "checksum": "",
     "SubItens": {
@@ -21,7 +25,7 @@
     }
   },
   "test.txt": {
-    "checksum": 4177538280,
+    "checksum": 3900170791,
     "SubItens": null
   }
 }

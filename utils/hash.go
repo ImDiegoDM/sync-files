@@ -37,7 +37,6 @@ func HashFolder(path string) (HashItems, error) {
 	hashes := HashItems{}
 
 	for _, file := range files {
-		fmt.Println(file.Name())
 		filePath := path
 		if path[len(path)-1] != '/' {
 			filePath += "/"
@@ -101,4 +100,6 @@ func HashAndSave(path string) {
 	check(err)
 
 	saveJSON(string(jsonString))
+
+	fmt.Println("sync folder hashed and saved")
 }

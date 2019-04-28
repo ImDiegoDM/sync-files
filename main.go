@@ -2,6 +2,7 @@ package main
 
 import (
 	"SyncFiles/api"
+	"SyncFiles/utils"
 	"log"
 	"net/http"
 
@@ -14,6 +15,8 @@ const (
 
 func main() {
 	r := mux.NewRouter()
+
+	go utils.HashAndSave("./sync")
 
 	api.SetRoutes(r)
 

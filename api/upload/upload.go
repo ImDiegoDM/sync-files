@@ -2,7 +2,7 @@ package upload
 
 import (
 	"SyncFiles/api/apimessage"
-	"errors"
+	"SyncFiles/utils"
 	"fmt"
 	"io/ioutil"
 	"mime/multipart"
@@ -50,17 +50,45 @@ func isMultipart(r *http.Request) bool {
 	return strings.Contains(contentType, "multipart/form-data")
 }
 
-func (u Handler) replaceFile(relativePathToFile string, newFile multipart.File, handler *multipart.FileHeader) error {
-	fileExt := filepath.Ext(relativePathToFile)
-	newFileExt := filepath.Ext(handler.Filename)
+func splitFileAndPath(pathToFile string) (string, string) {
+	splited := strings.SplitAfter(pathToFile, "/")
 
-	if fileExt != newFileExt {
-		return errors.New("The files extensions did not match")
+	file := splited[len(splited)-1]
+
+	path := ""
+	for i := 0; i < len(splited)-1; i++ {
+		path += splited[i]
 	}
+
+	return path, file
+}
+
+func exists(path string) bool {
+	if _, err := os.Stat("/path/to/whatever"); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
+
+func (u Handler) createIfNotExists(pathToFile string) (*os.File, error) {
+	path, _ := splitFileAndPath(pathToFile)
+
+	os.MkdirAll(u.Path+path, os.ModePerm)
+
+	file, err := os.Create(u.Path + pathToFile)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, err
+}
+
+func (u Handler) replaceFile(relativePathToFile string, newFile multipart.File) error {
 
 	fmt.Println(u.Path + relativePathToFile)
 
-	file, err := os.Create(u.Path + relativePathToFile)
+	file, err := u.createIfNotExists(relativePathToFile)
 	if err != nil {
 		return err
 	}
@@ -103,24 +131,31 @@ func (u Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	ext := filepath.Ext(url)
-	if ext != "" {
+	path := url
+	if ext == "" {
+		if string(url[len(url)-1]) != "/" {
+			path += "/"
+		}
+		path += handler.Filename
+	} else {
+		fileExt := filepath.Ext(url)
+		newFileExt := filepath.Ext(handler.Filename)
 
-		err = u.replaceFile(url, file, handler)
-
-		if err != nil {
-
-			if err.Error() == "The files extensions did not match" {
-				apimessage.ThrowAPIError(w, "the file you try to replace have a diferent extension that the file we recived", http.StatusUnprocessableEntity)
-				return
-			}
-
-			apimessage.ThrowAPIError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		if fileExt != newFileExt {
+			apimessage.ThrowAPIError(w, "the file you try to replace have a diferent extension that the file we recived", http.StatusUnprocessableEntity)
 			return
 		}
+	}
 
-		apimessage.APIResponse(w, "the file has been successfully uploaded")
+	err = u.replaceFile(path, file)
+
+	if err != nil {
+		fmt.Println(err)
+		apimessage.ThrowAPIError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Fprintln(w, "last is not a file")
+	apimessage.APIResponse(w, "the file has been successfully uploaded")
+	go utils.HashAndSave("./sync")
+	return
 }

@@ -3,6 +3,10 @@
     "checksum": 250248441,
     "SubItens": null
   },
+  "novo arquivo.txt": {
+    "checksum": 3900170791,
+    "SubItens": null
+  },
   "otherText.ts": {
     "checksum": 246742902,
     "SubItens": null
@@ -21,6 +25,32 @@
       "queen-bohemian-rhapsody.pdf": {
         "checksum": 287989756,
         "SubItens": null
+      }
+    }
+  },
+  "test": {
+    "checksum": "",
+    "SubItens": {
+      "test2": {
+        "checksum": "",
+        "SubItens": {
+          "10_Ortogonalidade_Distancia entre pontos.pdf": {
+            "checksum": 1500719054,
+            "SubItens": null
+          },
+          "Atividade Aula 3.pdf": {
+            "checksum": 4241658883,
+            "SubItens": null
+          },
+          "Atividade Aula3.pdf": {
+            "checksum": 4241658883,
+            "SubItens": null
+          },
+          "test.pdf": {
+            "checksum": 250248441,
+            "SubItens": null
+          }
+        }
       }
     }
   },

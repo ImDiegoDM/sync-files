@@ -1,2 +1,3 @@
-sync
+sync/*
 hashed.json
+!sync/.gitkeep

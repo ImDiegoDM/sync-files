@@ -38,10 +38,16 @@ func HashFolder(path string) (HashItems, error) {
 
 	for _, file := range files {
 		filePath := path
+		fileName := file.Name()
+
+		if fileName[0] == '.' {
+			continue
+		}
+
 		if path[len(path)-1] != '/' {
 			filePath += "/"
 		}
-		filePath += file.Name()
+		filePath += fileName
 
 		if !file.IsDir() {
 			hash, err := Hash(filePath)
@@ -64,7 +70,7 @@ func HashFolder(path string) (HashItems, error) {
 		}
 
 		hashes[file.Name()] = HashItem{
-			Checksum: "",
+			Checksum: nil,
 			SubItens: hashed,
 		}
 	}

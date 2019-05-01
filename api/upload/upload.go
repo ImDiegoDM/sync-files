@@ -133,7 +133,7 @@ func (u Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ext := filepath.Ext(url)
 	path := url
 	if ext == "" {
-		if string(url[len(url)-1]) != "/" {
+		if url[len(url)-1] != '/' {
 			path += "/"
 		}
 		path += handler.Filename

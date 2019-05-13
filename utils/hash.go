@@ -1,21 +1,24 @@
 package utils
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"hash/crc32"
 	"io/ioutil"
 	"os"
 )
 
 // Hash a file in crc32 and return the checksum
-func Hash(path string) (uint32, error) {
+func Hash(path string) (string, error) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return crc32.ChecksumIEEE(file), nil
+	hash := sha256.Sum256(file)
+
+	return hex.EncodeToString(hash[:]), nil
 }
 
 // HashItems represente a map of HashItem
@@ -24,7 +27,7 @@ type HashItems map[string]HashItem
 // HashItem represent a hashed file or a folder with hashed files
 type HashItem struct {
 	Checksum interface{} `json:"checksum"`
-	SubItens HashItems   `json:"SubItens"`
+	SubItens HashItems   `json:"subItens"`
 }
 
 // HashFolder hashes an intire foleder and return represted in HashItems form

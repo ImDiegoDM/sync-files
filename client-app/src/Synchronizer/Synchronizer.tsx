@@ -3,6 +3,11 @@ import { File } from './components/File';
 import { Box } from '../Common'
 import { useEndPoint, ErrorEndPoint } from '../Common/hooks/useEndPoint';
 import { api } from '../api';
+import { remote } from 'electron';
+import { usePromise, PromiseError } from '../Common/hooks/usePromise';
+import { getFolderUrl } from '../folder';
+
+const fs:FS = remote.require('fs');
 
 interface Hash{
   [key:string]: {
@@ -15,7 +20,7 @@ function Waiting(){
   return <h3>Loading...</h3>
 }
 
-function Error(props:ErrorEndPoint) {
+function Error(props:ErrorEndPoint|PromiseError) {
   console.log(props);
   return <h3>Opps.. it seems an error has ocurred</h3>
 }
@@ -37,15 +42,44 @@ function HashToFiles({hash}:HashToFilesProps){
   </>
 }
 
+function ReadDir(path:string):Promise<string[]>{
+  return new Promise((res,rej)=>{
+    fs.readdir(path,(err,files)=>{
+      if(err){
+        rej(err)
+        return;
+      };
+
+      res(files)
+    });
+  })
+}
+
+interface RenderFilesProps{
+  files:string[]
+}
+
+function RenderFiles(props:RenderFilesProps){
+  return <>
+    {props.files.map((file)=><File key={file} name={file}/>)}
+  </>
+}
+
 export function Synchronizer(){
-  const Api = useEndPoint<Hash>({endPointCall:api.get('/hash')})
+  // const Api = useEndPoint<Hash>({endPointCall:api.get('/hash')});
+
+  const Files = usePromise({promise:ReadDir(getFolderUrl())})
+
+  React.useEffect(()=>{
+
+  },[])
 
   return <Box wrap="wrap">
-    <Api waiting={Waiting} error={Error}>
+    <Files waiting={Waiting} error={Error}>
       {(props)=>{
         console.log(props)
-        return <HashToFiles hash={props.data}/>
+        return <RenderFiles files={props.data}/>
       }}
-    </Api>
+    </Files>
   </Box>
 }

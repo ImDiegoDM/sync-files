@@ -1,13 +1,16 @@
 import * as React from 'react';
-import { File } from './components/File';
+import { File,Filetype } from './components/File';
 import { Box } from '../Common'
-import { useEndPoint, ErrorEndPoint } from '../Common/hooks/useEndPoint';
-import { api } from '../api';
+import { ErrorEndPoint, useEndPoint } from '../Common/hooks/useEndPoint';
 import { remote } from 'electron';
 import { usePromise, PromiseError } from '../Common/hooks/usePromise';
 import { getFolderUrl } from '../folder';
+import { api } from '../api';
+import { checkFiles, HashItems } from '../Common/utils/checkFiles';
+import { Subscribe, UnSubscribe } from '../events';
+import { fileChannel, FileActions } from '../file';
 
-const fs:FS = remote.require('fs');
+const fs:any = remote.require('fs');
 
 interface Hash{
   [key:string]: {
@@ -42,7 +45,12 @@ function HashToFiles({hash}:HashToFilesProps){
   </>
 }
 
-function ReadDir(path:string):Promise<string[]>{
+interface DiskOBJ {
+  name:string;
+  type: Filetype;
+}
+
+function ReadDir(path:string):Promise<DiskOBJ[]>{
   return new Promise((res,rej)=>{
     fs.readdir(path,(err,files)=>{
       if(err){
@@ -50,35 +58,63 @@ function ReadDir(path:string):Promise<string[]>{
         return;
       };
 
-      res(files)
+      res(files.map((file)=>{
+        return {
+          name:file,
+          type:fs.lstatSync(path+'\\'+file).isDirectory() ? 'folder':'file'
+        }
+      }))
     });
   })
 }
 
 interface RenderFilesProps{
-  files:string[]
+  files:DiskOBJ[];
+  onOpenFolder?:(folderName:string)=>void
 }
 
 function RenderFiles(props:RenderFilesProps){
   return <>
-    {props.files.map((file)=><File key={file} name={file}/>)}
+    {props.files.map((file)=><File key={file.name} onDoubleClick={()=>{
+      if(file.type === 'folder'){
+        props.onOpenFolder(file.name);
+      }
+    }} name={file.name} type={file.type}/>)}
   </>
 }
 
 export function Synchronizer(){
-  // const Api = useEndPoint<Hash>({endPointCall:api.get('/hash')});
+  const id = 'synchronizer';
+  const folder = getFolderUrl();
 
-  const Files = usePromise({promise:ReadDir(getFolderUrl())})
+  const [refresh,setRefresh] = React.useState(0);
+  const [path,setPath] = React.useState('');
+
+  const Files = usePromise({promise:ReadDir, args:[folder+path]},[path]);
 
   React.useEffect(()=>{
-
-  },[])
+    Subscribe(fileChannel,id,(message)=>{
+      switch (message) {
+        case FileActions.add:
+        case FileActions.remove:
+          setRefresh(refresh+1);
+          console.log('recived action')
+          break;
+      }
+    })
+    return()=>{
+      console.log("remove")
+      UnSubscribe(fileChannel,id);
+    }
+  });
 
   return <Box wrap="wrap">
     <Files waiting={Waiting} error={Error}>
       {(props)=>{
-        console.log(props)
-        return <RenderFiles files={props.data}/>
+        console.log(props.data)
+        return <RenderFiles onOpenFolder={(folderName)=>{
+          setPath(path+'\\'+folderName);
+        }} files={props.data}/>
       }}
     </Files>
   </Box>

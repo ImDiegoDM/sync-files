@@ -13,4 +13,8 @@ export const GlobalStyle = createGlobalStyle`
   button:hover{
     color: #6f6f6f;
   }
+
+  input[type="file" i]{
+    display:none;
+  }
 `;

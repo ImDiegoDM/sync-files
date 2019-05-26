@@ -2,7 +2,8 @@ import * as React from 'react';
 import { ApiResponse } from 'apisauce';
 
 export interface EndPointConfig{
-  endPointCall: Promise<ApiResponse<any>>;
+  endPointCall: (...args:any[])=>Promise<ApiResponse<any>>;
+  args:any[]
 }
 
 export interface SuccessEndPoint<T = any>{
@@ -20,14 +21,14 @@ export interface EndPointProps<S=any,E=any>{
   children:React.FC<SuccessEndPoint<S>>;
 }
 
-export function useEndPoint<S=any,E=any>({endPointCall}:EndPointConfig): React.FC<EndPointProps<S,E>>{
+export function useEndPoint<S=any,E=any>({endPointCall,args}:EndPointConfig,refresh?:any[]): React.FC<EndPointProps<S,E>>{
   const [fetching,setFectching] = React.useState(true);
   const [data,setData] = React.useState<S|E|undefined>(undefined);
   const [ok,setOk] = React.useState(true);
   const [status,setStatus] = React.useState(undefined);
 
   React.useEffect(()=>{
-    endPointCall.then((response)=>{
+    endPointCall(...args).then((response)=>{
 
       if(!response.ok){
         setOk(false);
@@ -37,7 +38,7 @@ export function useEndPoint<S=any,E=any>({endPointCall}:EndPointConfig): React.F
       setData(response.data);
       setFectching(false);
     })
-  },[])
+  },refresh || [])
 
   return (props:EndPointProps<S,E>)=>{
     if(fetching){

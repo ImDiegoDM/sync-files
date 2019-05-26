@@ -1,7 +1,8 @@
 import * as React from 'react';
 
 export interface PromiseConfig<T>{
-  promise: Promise<T>;
+  promise: (...args:any[])=>Promise<T>;
+  args: any[];
 }
 
 export interface PromiseSuccess<T = any>{
@@ -18,13 +19,13 @@ export interface PromiseProps<S=any,E=any>{
   children:React.FC<PromiseSuccess<S>>;
 }
 
-export function usePromise<S=any>({promise}:PromiseConfig<S>): React.FC<PromiseProps<S>>{
+export function usePromise<S=any>({promise,args}:PromiseConfig<S>,refresh?:any[]): React.FC<PromiseProps<S>>{
   const [loading,setLoading] = React.useState(true);
   const [data,setData] = React.useState<S|undefined>(undefined);
   const [error,setError] = React.useState(false);
 
   React.useEffect(()=>{
-    promise.then((response)=>{
+    promise(...args).then((response)=>{
       setData(response);
       setLoading(false);
     }).catch((err)=>{
@@ -32,7 +33,7 @@ export function usePromise<S=any>({promise}:PromiseConfig<S>): React.FC<PromiseP
       setError(true);
       setLoading(false);
     })
-  },[])
+  },refresh || [])
 
   return (props:PromiseProps<S>)=>{
     if(loading){

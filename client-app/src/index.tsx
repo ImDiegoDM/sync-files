@@ -2,6 +2,9 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import App from './App/App';
 import * as serviceWorker from './serviceWorker';
+import { getAndCheckHash } from './Common/utils/checkFiles'
+
+getAndCheckHash();
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

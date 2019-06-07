@@ -6,6 +6,7 @@ import { Publish } from "../../events";
 import { fileChannel, FileActions } from "../../file";
 import { HashFile } from "./hash";
 import { api } from '../../api';
+import { log } from "../../Logs";
 
 export interface HashItem{
   checksum?: string;
@@ -23,8 +24,16 @@ export interface WrongFiles{
 const fs:any = remote.require('fs');
 
 export async function getAndCheckHash(){
-  const hashFiles = (await api.get<HashItems>('/hash')).data;
-  checkFiles(hashFiles);
+  const apiResponse = await api.get<HashItems>('/hash');
+  console.log(apiResponse)
+  if(apiResponse.ok === false){
+    log('Api comunication failed')
+    return
+  }
+
+  log('Getted hash from api')
+  log('Starting to check files...');
+  checkFiles(apiResponse.data);
 }
 
 export const syncedFiles = {}
@@ -33,7 +42,6 @@ export const syncedFiles = {}
 // recived from the api, if a file or a folder is not find
 // the file or folder is downloaded or created
 export async function checkFiles(hash:HashItems,path=''){
-  console.log('checking files')
   const errors = undefined;
   const folder = getFolderUrl();
 
@@ -47,27 +55,31 @@ export async function checkFiles(hash:HashItems,path=''){
 
       if(!existsFile(relativePath)){
         if(element.subItens !== null){
+          log(`Folder ${fileName} not found`);
           fs.mkdirSync(filePath);
-          checkFiles(element.subItens,relativePath);
+          log(`Created ${fileName} folder`);
+          await checkFiles(element.subItens,relativePath);
           continue;
         }
 
+        log(`File ${fileName} not founded, downloading ${fileName} from the api...`);
         DowloadFile(fileName,path);
       }
       else{
         if(element.subItens !== null){
-          checkFiles(element.subItens,relativePath);
+          await checkFiles(element.subItens,relativePath);
           continue;
         }
-  
+        
         const digest = await HashFile(filePath);
         if(digest!==element.checksum){
+          log(`File ${fileName} is not the same from the api, updating ${fileName}...`);
           DowloadFile(fileName,path);
           continue;
         }
 
         syncedFiles[fileName] = true;
-        Publish(fileChannel,FileActions.synced,{name:fileName})
+        Publish(fileChannel,FileActions.synced,{name:fileName});
       }
 
     }

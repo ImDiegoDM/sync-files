@@ -3,6 +3,7 @@ package api
 import (
 	"SyncFiles/api/apimessage"
 	"SyncFiles/api/upload"
+	"SyncFiles/utils"
 	"io/ioutil"
 	"net/http"
 
@@ -25,6 +26,7 @@ func serveHash(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(file)
+	go utils.HashAndSave("./sync")
 }
 
 // SetRoutes set the routes for web applications

@@ -12,11 +12,6 @@ import (
 	"strings"
 )
 
-// Upload a file to the sync folder
-func Upload(path string) {
-	panic("not implemented yet")
-}
-
 func breakURL(path string) []string {
 	return strings.Split(path, "/")
 }

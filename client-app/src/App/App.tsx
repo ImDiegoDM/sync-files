@@ -7,6 +7,7 @@ import { GlobalStyle } from './components/GlobalStyle';
 import { SelectedFolderPage } from './pages/SelectedFolderPage';
 import { Subscribe, UnSubscribe } from '../events';
 import { remote } from 'electron';
+import { Logs } from '../Logs';
 
 const fs:any = remote.require('fs');
 
@@ -16,6 +17,7 @@ const App: React.FC = () => {
     <>
       <h1>Simple sync file sistem</h1>
       <GlobalStyle/>
+      <Logs/>
       <Root/>
     </>
   );

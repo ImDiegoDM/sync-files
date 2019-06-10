@@ -11,6 +11,7 @@ import { Subscribe, UnSubscribe } from '../events';
 import { fileChannel, FileActions } from '../file';
 
 const fs:any = remote.require('fs');
+const path:any = remote.require('path');
 
 interface Hash{
   [key:string]: {
@@ -50,9 +51,9 @@ interface DiskOBJ {
   type: Filetype;
 }
 
-function ReadDir(path:string):Promise<DiskOBJ[]>{
+function ReadDir(dirPath:string):Promise<DiskOBJ[]>{
   return new Promise((res,rej)=>{
-    fs.readdir(path,(err,files)=>{
+    fs.readdir(dirPath,(err,files)=>{
       if(err){
         rej(err)
         return;
@@ -61,7 +62,7 @@ function ReadDir(path:string):Promise<DiskOBJ[]>{
       res(files.map((file)=>{
         return {
           name:file,
-          type:fs.lstatSync(path+'\\'+file).isDirectory() ? 'folder':'file'
+          type:fs.lstatSync(path.join(dirPath,file)).isDirectory() ? 'folder':'file'
         }
       }))
     });
@@ -88,9 +89,9 @@ export function Synchronizer(){
   const folder = getFolderUrl();
 
   const [refresh,setRefresh] = React.useState(0);
-  const [path,setPath] = React.useState('');
+  const [filePath,setPath] = React.useState('');
 
-  const Files = usePromise({promise:ReadDir, args:[folder+path]},[path]);
+  const Files = usePromise({promise:ReadDir, args:[folder+filePath]},[filePath]);
 
   React.useEffect(()=>{
     Subscribe(fileChannel,id,(message)=>{
@@ -113,7 +114,7 @@ export function Synchronizer(){
       {(props)=>{
         console.log(props.data)
         return <RenderFiles onOpenFolder={(folderName)=>{
-          setPath(path+'\\'+folderName);
+          setPath(path.join(filePath,folderName));
         }} files={props.data}/>
       }}
     </Files>

@@ -10,6 +10,7 @@ import { remote } from 'electron';
 import { Logs } from '../Logs';
 
 const fs:any = remote.require('fs');
+const path:any = remote.require('path');
 
 const App: React.FC = () => {
   console.log(logo);
@@ -49,8 +50,8 @@ function Root(){
 
   if(folder === undefined || folder === null){
     return <ChossenDirectory onChange={(event)=>{
-      const path = event.target.files[0].path;
-      const folder = path+'\\sync';
+      const chosenPath = event.target.files[0].path;
+      const folder = path.join(chosenPath,'sync');
       if(!fs.existsSync(folder)){
         fs.mkdirSync(folder);
       }

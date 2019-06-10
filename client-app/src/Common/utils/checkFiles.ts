@@ -22,6 +22,7 @@ export interface WrongFiles{
 }
 
 const fs:any = remote.require('fs');
+const path:any = remote.require('path');
 
 export async function getAndCheckHash(){
   const apiResponse = await api.get<HashItems>('/hash');
@@ -41,7 +42,7 @@ export const syncedFiles = {}
 // Compare the files in the selected folder with the hash
 // recived from the api, if a file or a folder is not find
 // the file or folder is downloaded or created
-export async function checkFiles(hash:HashItems,path=''){
+export async function checkFiles(hash:HashItems,folderPath=''){
   const errors = undefined;
   const folder = getFolderUrl();
 
@@ -49,8 +50,10 @@ export async function checkFiles(hash:HashItems,path=''){
     if (hash.hasOwnProperty(fileName)) {
 
       const element = hash[fileName];
-      const relativePath = path !== '' ? `${path}\\${fileName}`:`${fileName}`;
-      const filePath = `${folder}\\${relativePath}`;
+      console.log(folderPath,fileName)
+      const relativePath = folderPath !== '' ? path.join(folderPath,fileName):path.join(fileName);
+      const filePath = path.join(folder,relativePath);
+      console.log(filePath)
       syncedFiles[fileName] = false;
 
       if(!existsFile(relativePath)){
@@ -63,7 +66,7 @@ export async function checkFiles(hash:HashItems,path=''){
         }
 
         log(`File ${fileName} not founded, downloading ${fileName} from the api...`);
-        DowloadFile(fileName,path);
+        DowloadFile(fileName,folderPath);
       }
       else{
         if(element.subItens !== null){
@@ -74,7 +77,7 @@ export async function checkFiles(hash:HashItems,path=''){
         const digest = await HashFile(filePath);
         if(digest!==element.checksum){
           log(`File ${fileName} is not the same from the api, updating ${fileName}...`);
-          DowloadFile(fileName,path);
+          DowloadFile(fileName,folderPath);
           continue;
         }
 

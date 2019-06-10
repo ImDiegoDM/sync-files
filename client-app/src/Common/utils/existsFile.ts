@@ -1,9 +1,11 @@
 import { getFolderUrl } from "../../folder";
 import { remote } from "electron";
 
-const fs:FS = remote.require('fs');
+const fs:any = remote.require('fs');
+const path:any = remote.require('path');
 
 export function existsFile(file: string) {
   const folder = getFolderUrl();
-  return fs.existsSync(folder + '\\' + file);
+
+  return fs.existsSync(path.join(folder, file));
 }

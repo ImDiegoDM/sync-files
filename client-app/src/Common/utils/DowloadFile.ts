@@ -7,11 +7,12 @@ import { syncedFiles } from "./checkFiles";
 import { log } from "../../Logs";
 
 const fs:any = remote.require('fs');
+const path:any = remote.require('path');
 
-export async function DowloadFile(fileName: string,path: string='') {
+export async function DowloadFile(fileName: string,folderPath: string='') {
   const folder = getFolderUrl();
-  const relativePath = path !== '' ? `${path}\\${fileName}`:`${fileName}`; 
-  const filePath =`${folder}\\${relativePath}`;
+  const relativePath = folderPath !== '' ? path.join(folderPath,fileName):path.join(fileName); 
+  const filePath = path.join(folder,relativePath);
 
   const response = await HttpGetPromisse(`/download/${relativePath}`);
   
